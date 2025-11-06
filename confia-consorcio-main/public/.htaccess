@@ -1,0 +1,46 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Forçar HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  
+  # Se o arquivo ou diretório existir fisicamente, serve normalmente
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Caso contrário, redireciona para index.html
+  RewriteRule ^ index.html [QSA,L]
+</IfModule>
+
+  # Security Headers
+<IfModule mod_headers.c>
+  # HSTS: Force HTTPS for 1 year (31536000 seconds)
+  # includeSubDomains: Apply to all subdomains
+  # preload: Eligible for browser HSTS preload lists
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+  
+  # Prevent clickjacking attacks - Unset to allow Lovable editor
+  Header always unset X-Frame-Options
+  
+  # Prevent MIME type sniffing
+  Header always set X-Content-Type-Options "nosniff"
+  
+  # Control referrer information
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  
+  # Content Security Policy - Protege contra XSS e injeção de código
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://lovable.dev https://*.lovable.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://lovable.dev; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://app.crmdeconsorcio.com.br https://ztscllqqejcjvfrmxmcs.supabase.co wss://ztscllqqejcjvfrmxmcs.supabase.co https://lovable.dev https://*.lovable.dev; worker-src 'self' blob:; frame-src https://lovable.dev https://*.lovable.dev; child-src https://lovable.dev https://*.lovable.dev; frame-ancestors 'self' https://lovable.dev https://*.lovable.dev; base-uri 'self'; form-action 'self' https://app.crmdeconsorcio.com.br; object-src 'none'; upgrade-insecure-requests"
+  
+  # Permissions Policy - Controla recursos do navegador
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+  
+  # Cross-Origin Policies (relaxed for Lovable integration)
+  Header always set Cross-Origin-Embedder-Policy "unsafe-none"
+  Header always set Cross-Origin-Opener-Policy "unsafe-none"
+  Header always set Cross-Origin-Resource-Policy "cross-origin"
+  
+  # Previne browsers de identificar tipo de conteúdo incorretamente
+  Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
